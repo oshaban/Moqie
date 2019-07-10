@@ -29,7 +29,21 @@ const Genre = mongoose.model('Genres',genreSchema);
 
 //A GET request to this endpoint will return all genres
 router.get('/', function(req,res) {
-    res.send(genres);
+    
+    async function getGenres() {
+        try {
+            const fetchedGenres = await Genre.find();
+            console.log(fetchedGenres);
+            res.send(fetchedGenres);
+
+        } catch (error) {
+            res.status(400).send('Database Error') ;   
+        }
+        
+    }
+
+    getGenres();
+    
 });
 
 //A GET request to this endpoint will return a genre with the specified ID in the route param
@@ -37,16 +51,22 @@ router.get('/', function(req,res) {
     //Body response is a JSON with the genre containing the specified ID. 404 is returned if resource not found.
 router.get('/:id', function(req,res) {
     enteredID = parseInt(req.params.id); //Gets dynamic route parameter
-    
-    //Contains genre object if id found, otherwise is undefined
-    const result = genres.find((obj)=>{return obj.id == enteredID;})
 
-    if(result === undefined){
-        res.status(404).send('The genre with given ID was not found');
-    } else {
-        res.send(result)
+    async function getGenres() {
+        try {
+            const fetchedGenres = await Genre
+                .find({id: enteredID}) //*** */add logic to return an error if id doesn't exist in DB****
+            console.log(fetchedGenres);
+            res.send(fetchedGenres);
+
+        } catch (error) {
+            res.status(400).send('Database Error') ;   
+        }
+        
     }
-    
+
+    getGenres();
+
 });
 
 //A PUT request to this endpoint will update a genre with a specified id
@@ -128,7 +148,7 @@ router.post('/', function(req,res) {
 
             } catch (error) {
                 console.log(error);
-                res.status(400).send("Database Error");
+                res.status(400).send('Database Error');
             }
 
         }
