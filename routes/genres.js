@@ -3,12 +3,29 @@
 const express = require('express');
 const router = express.Router(); //Creates a router as a module
 const Joi = require('@hapi/joi'); //Used for input validation
+const mongoose = require('mongoose') //Used to perform database operations
 
-genres = [
+//Connects to local MongoDB database
+mongoose.connect('mongodb://localhost:27017/moqie', {useNewUrlParser: true})
+    .then(() => console.log('Connected to MongoDB')  )
+    .catch((err) => console.log('Could not connect to MongoDB ' + err));
+
+//Generates a new mongoose Schema to define the documents in the database
+const Schema = mongoose.Schema;
+const genreSchema = new Schema({
+    id: {type: Number, required: true},
+    name: {type: String, required: true}
+});
+
+//Defines a new collection 'Genres' in the DB; known as a Model
+const Genre = mongoose.model('Genres',genreSchema);
+
+
+/* genres = [
     {id: 1, name: 'drama'},
     {id: 2, name: 'comedy'},
     {id: 3, name: 'action'}
-]
+] */
 
 //A GET request to this endpoint will return all genres
 router.get('/', function(req,res) {
@@ -95,11 +112,34 @@ router.post('/', function(req,res) {
     const result = validateGenre(req.body); //If result.error === null -> input is valid
 
     if(result.error === null) {
-        newObj = {id: genres.length+1, name: req.body.name};
-        genres.push(newObj); //Adds it to the array
-        res.send(newObj); //Send the new object back 
+
+        //Create a new Genre using the Model
+        const newGenreDoc = new Genre({
+            id: 9,
+            name: req.body.name
+        })
+
+        async function createGenre() {
+            //Save the document to the DB
+            try {
+                const result = await newGenreDoc.save();
+                console.log(result);
+                res.send(result); //Send the new object back in the HTTP response 
+
+            } catch (error) {
+                console.log(error);
+                res.status(400).send("Database Error");
+            }
+
+        }
+
+        createGenre();
+
+        /* newObj = {id: genres.length+1, name: req.body.name};
+        genres.push(newObj); //Adds it to the array */
+
     } else {
-        res.status(400).send(result.error);
+        res.status(400).send(result.error); //400 Bad Request
     }
 
 });
