@@ -5,41 +5,30 @@ const router = express.Router(); //Creates a router as a module
 const Joi = require('@hapi/joi'); //Used for input validation
 const mongoose = require('mongoose') //Used to perform database operations
 
-//Connects to local MongoDB database
-mongoose.connect('mongodb://localhost:27017/moqie', {useNewUrlParser: true})
-    .then(() => console.log('Connected to MongoDB')  )
-    .catch((err) => console.log('Could not connect to MongoDB ' + err));
-
 //Generates a new mongoose Schema to define the documents in the database
 const Schema = mongoose.Schema;
 const genreSchema = new Schema({
-    id: {type: Number, required: true},
-    name: {type: String, required: true}
+    name: {type: String, required: true, minlength: 3, maxlength:30}
 });
 
 //Defines a new collection 'Genres' in the DB; known as a Model
-const Genre = mongoose.model('Genres',genreSchema);
-
-
-/* genres = [
-    {id: 1, name: 'drama'},
-    {id: 2, name: 'comedy'},
-    {id: 3, name: 'action'}
-] */
+const Genre = mongoose.model('Genres', genreSchema);
 
 //A GET request to this endpoint will return all genres
 router.get('/', function(req,res) {
     
     async function getGenres() {
         try {
-            const fetchedGenres = await Genre.find();
+            const fetchedGenres = await Genre
+                .find()
+                .select({name: 1})
+                .sort('name');
             console.log(fetchedGenres);
             res.send(fetchedGenres);
 
         } catch (error) {
             res.status(400).send('Database Error') ;   
         }
-        
     }
 
     getGenres();
@@ -50,12 +39,13 @@ router.get('/', function(req,res) {
     //Body request is empty
     //Body response is a JSON with the genre containing the specified ID. 404 is returned if resource not found.
 router.get('/:id', function(req,res) {
-    enteredID = parseInt(req.params.id); //Gets dynamic route parameter
+    enteredID = req.params.id; //Gets dynamic route parameter
 
     async function getGenres() {
         try {
             const fetchedGenres = await Genre
-                .find({id: enteredID}) //*** */add logic to return an error if id doesn't exist in DB****
+                .find({_id: enteredID}) //*** */add logic to return an error if id doesn't exist in DB****
+                .select({name: 1});
             console.log(fetchedGenres);
             res.send(fetchedGenres);
 
@@ -74,60 +64,58 @@ router.get('/:id', function(req,res) {
         //name property must be a string of length 3; if not valid 400 - Bad request is sent
     //Body response is a JSON with the updated genre 
 router.put('/:id', function(req,res) {
-    enteredID = parseInt(req.params.id); //Gets dynamic route parameter
+    enteredID = req.params.id; //Gets dynamic route parameter
 
-    //Checks if a genre with the id in the route param exists in the array
-        //findIndex returns -1 if no element found
-    const elementIndex = genres.findIndex((element)=>{
-        if(element.id === enteredID){
-            return true;
-        }
-    });
+    //Validate the HTTP body request
+    const result = validateGenre(req.body); //If result.error === null -> input is valid
+    
+    if(result.error != null) {
+        res.status(400).send(result.error); //Sends the error object in the response
+    } 
 
-    if(elementIndex === -1){
-        res.status(404).send('Genre with the given ID does not exist');
-    } else {
-        //Check if Body of request is valid
-        const result = validateGenre(req.body); //If result.error === null -> input is valid
-
-        if(result.error === null) {
-            genres[elementIndex].name = req.body.name //Updates the object in the array
-            res.send(genres[elementIndex]);
+    async function updateGenre() {
+        const fetchedGenre = await Genre.findByIdAndUpdate(enteredID, {name: req.body.name}, {
+            new: true
+        });
+    
+        if(!fetchedGenre){
+            res.status(404).send('Genre with the given ID does not exist');
         } else {
-            res.status(400).send(result.error); //Sends the error object in the response
+            res.send(fetchedGenre);
         }
     }
+
+    updateGenre();
+
 });
 
 //A DELETE request to this endpoint will delete a genre with a specified id
     //Body request is empty
     //Body response is a JSON with the deleted genre
 router.delete('/:id', function(req,res) {
-    enteredID = parseInt(req.params.id); //Gets dynamic route parameter
+    enteredID = req.params.id; //Gets dynamic route parameter
   
-    //Checks if a genre with the id in the route param exists
-        //findIndex returns -1 if no element found
-    const elementIndex = genres.findIndex((element)=>{
-        if(element.id === enteredID){
-            return true;
-        }
-    });
+    async function deleteGenre() {
+        try {
+            const deletedGenre = await Genre.findByIdAndDelete(enteredID);
+            console.log(deletedGenre);
+            res.send(deletedGenre);
 
-    if(elementIndex === -1){
-        res.status(404).send('Genre with the given ID does not exist');
-    } else {
-        const objDel = genres.splice(elementIndex,1);
-        res.send(objDel);
+        } catch (error) {
+            res.status(404).send('Resource Not Found') ;   
+        }
+        
     }
+
+    deleteGenre(); 
 
 });
 
-//A PUT request to this endpoint will update a genre with a specified id
+//A POST request to this endpoint will create a new genre
     //Body request is a JSON pay-load with a 'name' property {name: 'your-name'}
         //name property must be a string of length 3; if not valid 400 - Bad request is sent
     //Body response is a JSON with the new genre
 router.post('/', function(req,res) {
-    enteredID = parseInt(req.params.id); //Gets dynamic route parameter
 
     const result = validateGenre(req.body); //If result.error === null -> input is valid
 
@@ -135,9 +123,8 @@ router.post('/', function(req,res) {
 
         //Create a new Genre using the Model
         const newGenreDoc = new Genre({
-            id: 9,
             name: req.body.name
-        })
+        });
 
         async function createGenre() {
             //Save the document to the DB
@@ -148,15 +135,11 @@ router.post('/', function(req,res) {
 
             } catch (error) {
                 console.log(error);
-                res.status(400).send('Database Error');
+                res.status(404).send('Resource not found');
             }
-
         }
 
         createGenre();
-
-        /* newObj = {id: genres.length+1, name: req.body.name};
-        genres.push(newObj); //Adds it to the array */
 
     } else {
         res.status(400).send(result.error); //400 Bad Request
