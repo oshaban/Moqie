@@ -88,7 +88,15 @@ router.put('/:id', function(req,res) {
             .findByIdAndUpdate(enteredID,
                 {isPremium: req.body.isPremium, name: req.body.name, phone: req.body.phone},
                 {new: true, useFindAndModify: false});
-            res.send(fetchedCustomer);
+
+            if(fetchedCustomer === null) {
+                //Customer with ID was not found in the DB
+                res.status(404).send('Resource not found');
+            } else {
+                res.send(fetchedCustomer);
+                console.log(fetchedCustomer);
+            }
+
         } catch (error) {
             console.log("Error " + error);
             res.status(404).send('Error: ' + error)
@@ -105,11 +113,16 @@ router.delete('/:id', function(req,res) {
     async function deleteCustomer() {
         try {
             const deletedCustomer = await Customer.findByIdAndDelete(enteredID);
-            console.log(deletedCustomer);
-            res.send(deletedCustomer);
-
+            
+            if(deletedCustomer === null) {
+                //Customer with ID was not found in the DB
+                res.status(404).send('Resource not found');
+            } else {
+                res.send(deletedCustomer);
+                console.log(deletedCustomer);
+            }
         } catch (error) {
-            res.status(404).send('Resource Not Found') ;   
+            res.status(400).send('Invalid ID entered');   
         }
     }
 
@@ -151,7 +164,6 @@ router.post('/', function(req,res) {
     } else {
         res.status(400).send(inputValid.error); //400 Bad Request
     }
-
 });
 
 //Checks if the customer entered is valid
