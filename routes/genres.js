@@ -19,10 +19,7 @@ router.get('/', function(req,res) {
     
     async function getGenres() {
         try {
-            const fetchedGenres = await Genre
-                .find()
-                .select({name: 1})
-                .sort('name');
+            const fetchedGenres = await Genre.find()
             console.log(fetchedGenres);
             res.send(fetchedGenres);
 
@@ -41,21 +38,27 @@ router.get('/', function(req,res) {
 router.get('/:id', function(req,res) {
     enteredID = req.params.id; //Gets dynamic route parameter
 
-    async function getGenres() {
+    async function getGenre() {
         try {
-            const fetchedGenres = await Genre
-                .find({_id: enteredID}) //*** */add logic to return an error if id doesn't exist in DB****
+            const fetchedGenre = await Genre
+                .find({_id: enteredID})
                 .select({name: 1});
-            console.log(fetchedGenres);
-            res.send(fetchedGenres);
+            //fetchedGenres = [] if no such genre exists
+            
+            if(!fetchedGenre.length) {
+                res.status(404).send('Resource Not Found')
+            } else {
+                res.send(fetchedGenre)
+            }
+            console.log(fetchedGenre);
+            res.send(fetchedGenre);
 
         } catch (error) {
             res.status(400).send('Database Error') ;   
         }
-        
     }
 
-    getGenres();
+    getGenre();
 
 });
 
@@ -71,22 +74,28 @@ router.put('/:id', function(req,res) {
     
     if(result.error != null) {
         res.status(400).send(result.error); //Sends the error object in the response
-    } 
-
-    async function updateGenre() {
-        const fetchedGenre = await Genre.findByIdAndUpdate(enteredID, {name: req.body.name}, {
-            new: true
-        });
-    
-        if(!fetchedGenre){
-            res.status(404).send('Genre with the given ID does not exist');
-        } else {
-            res.send(fetchedGenre);
-        }
+    } else {
+        updateGenre();
     }
 
-    updateGenre();
-
+    async function updateGenre() {
+        try {
+            const fetchedGenre = await Genre.findByIdAndUpdate(enteredID, {name: req.body.name},
+            {new: true, useFindAndModify: false});
+        
+            if(fetchedGenre === null){
+                //Genre with given ID was not found in the DB
+                res.status(404).send('Resource not found');
+            } else {
+                res.send(fetchedGenre);
+                console.log(fetchedGenre);
+            }    
+        } catch (error) {
+            console.log("Error " + error);
+            res.status(404).send('Error: ' + error)
+        }
+        
+    }
 });
 
 //A DELETE request to this endpoint will delete a genre with a specified id
@@ -98,8 +107,14 @@ router.delete('/:id', function(req,res) {
     async function deleteGenre() {
         try {
             const deletedGenre = await Genre.findByIdAndDelete(enteredID);
-            console.log(deletedGenre);
-            res.send(deletedGenre);
+            
+            if(deletedGenre === null) {
+                //Genre with ID was not found in the DB
+                res.status(404).send('Resource not found')
+            } else{
+                console.log(deletedGenre);
+                res.send(deletedGenre);
+            }
 
         } catch (error) {
             res.status(404).send('Resource Not Found') ;   

@@ -45,8 +45,9 @@ router.get('/:id', function(req,res) {
     async function getCustomer() {
         try {
             const fetchedCustomer = await Customer
-                .find({_id: enteredID}); //[] if no such customer exists
-     
+                .find({_id: enteredID})
+                .select({name: 1});
+            //fetchedCustomer = [] if no such customer exists
             console.log(fetchedCustomer);
             
             if(!fetchedCustomer.length) {
