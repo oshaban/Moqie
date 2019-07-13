@@ -74,9 +74,9 @@ router.put('/:id', function(req,res) {
             try {
                 const genreDoc = await Genre.findById(req.body.genreID); //Finds a Genre based on the GenreID in the HTTP body request
 
-                const result = await Movie.findByIdAndUpdate({_id: enteredID}, {
-                    $set: {title: req.body.title, genre: genreDoc, numberInStock: req.body.numberInStock, dailyRentalRate: req.body.dailyRentalRate}
-                }, {new: true, useFindAndModify: false});
+                const result = await Movie.findByIdAndUpdate(enteredID,
+                    {title: req.body.title, genre: genreDoc, numberInStock: req.body.numberInStock, dailyRentalRate: req.body.dailyRentalRate},
+                    {new: true, useFindAndModify: false});
 
                 console.log(result);
                 res.send(result);
