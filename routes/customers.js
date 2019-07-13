@@ -13,7 +13,7 @@ router.get('/', function(req,res) {
     
     async function getCustomers() {
         try {
-            const fetchedCustomers = await Customer.find()
+            const fetchedCustomers = await Customer.find();
             console.log(fetchedCustomers);
             res.send(fetchedCustomers);
 

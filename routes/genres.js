@@ -11,7 +11,7 @@ router.get('/', function(req,res) {
     
     async function getGenres() {
         try {
-            const fetchedGenres = await Genre.find()
+            const fetchedGenres = await Genre.find();
             console.log(fetchedGenres);
             res.send(fetchedGenres);
 
