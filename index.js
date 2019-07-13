@@ -6,8 +6,10 @@ const app = express(); //Creates an express application
 
 const port = 3000; //Port for listening
 
+//Loading Router Modules:
 const genres = require('./routes/genres'); //Loads the router module for genres endpoint
 const customers = require('./routes/customers'); //Loads the router module for customers endpoint
+const movies = require('./routes/movies'); //Loads the router module for movies endpoint
 
 //Connects to local MongoDB database
 mongoose.connect('mongodb://localhost:27017/moqie', {useNewUrlParser: true})
@@ -26,5 +28,6 @@ if( app.get('env') === 'development') {
 //Routes:
 app.use('/api/genres', genres) //Uses the genres router if path is '/genres'
 app.use('/api/customers', customers) //Uses the customers router if path is '/customers'
+app.use('/api/movies', movies) //Uses the movies router if path is '/movies'
 
 app.listen(port, ()=> console.log('Listening on port ' + port));
