@@ -3,16 +3,8 @@
 const express = require('express');
 const router = express.Router(); //Creates a router as a module
 const Joi = require('@hapi/joi'); //Used for input validation
-const mongoose = require('mongoose') //Used to perform database operations
 
-//Generates a new mongoose Schema to define the documents in the database
-const Schema = mongoose.Schema;
-const genreSchema = new Schema({
-    name: {type: String, required: true, minlength: 3, maxlength:30}
-});
-
-//Defines a new collection 'Genres' in the DB; known as a Model
-const Genre = mongoose.model('Genres', genreSchema);
+const {Genre} = require('../models/genre')
 
 //A GET request to this endpoint will return all genres
 router.get('/', function(req,res) {
@@ -24,7 +16,7 @@ router.get('/', function(req,res) {
             res.send(fetchedGenres);
 
         } catch (error) {
-            res.status(400).send('Database Error') ;   
+            res.status(404).send('Resource Not Found');   
         }
     }
 
@@ -48,11 +40,9 @@ router.get('/:id', function(req,res) {
             if(!fetchedGenre.length) {
                 res.status(404).send('Resource Not Found')
             } else {
+                console.log(fetchedGenre);
                 res.send(fetchedGenre)
             }
-            console.log(fetchedGenre);
-            res.send(fetchedGenre);
-
         } catch (error) {
             res.status(400).send('Database Error') ;   
         }
@@ -87,8 +77,8 @@ router.put('/:id', function(req,res) {
                 //Genre with given ID was not found in the DB
                 res.status(404).send('Resource not found');
             } else {
-                res.send(fetchedGenre);
                 console.log(fetchedGenre);
+                res.send(fetchedGenre);
             }    
         } catch (error) {
             console.log("Error " + error);
@@ -117,7 +107,7 @@ router.delete('/:id', function(req,res) {
             }
 
         } catch (error) {
-            res.status(404).send('Resource Not Found') ;   
+            res.status(404).send('Invalid ID entered') ;   
         }
         
     }

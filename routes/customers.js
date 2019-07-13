@@ -3,18 +3,8 @@
 const express = require('express');
 const router = express.Router(); //Creates a router as a module
 const Joi = require('@hapi/joi'); //Used for input validation
-const mongoose = require('mongoose') //Used to perform database operations
 
-//Generates a new mongoose Schema to define the documents in the database
-const Schema = mongoose.Schema;
-const customerSchema = new Schema({
-    isPremium : {type: Boolean, required: true,},
-    name: {type: String, required: true, minlength: 3, maxlength:30},
-    phone : {type: String, required: true, minlength:10, maxlength:10}
-});
-
-//Defines a new collection 'Customers' in the DB; known as a Model
-const Customer = mongoose.model('Customers', customerSchema);
+const {Customer} = require('../models/customer'); //Load Customer DB Model
 
 //A GET request to this endpoint will return all customers
     //Body request is empty
@@ -55,9 +45,9 @@ router.get('/:id', function(req,res) {
                 res.status(404).send('Resource Not Found');
             }
             else {
+                console.log(fetchedCustomer);
                 res.send(fetchedCustomer);
             }
-
         } catch (error) {
             //If ID entered is an invalid MongoDB ID
             res.status(400).send('Invalid ID entered');   
@@ -94,8 +84,8 @@ router.put('/:id', function(req,res) {
                 //Customer with ID was not found in the DB
                 res.status(404).send('Resource not found');
             } else {
-                res.send(fetchedCustomer);
                 console.log(fetchedCustomer);
+                res.send(fetchedCustomer);
             }
 
         } catch (error) {
@@ -119,8 +109,8 @@ router.delete('/:id', function(req,res) {
                 //Customer with ID was not found in the DB
                 res.status(404).send('Resource not found');
             } else {
-                res.send(deletedCustomer);
                 console.log(deletedCustomer);
+                res.send(deletedCustomer);
             }
         } catch (error) {
             res.status(400).send('Invalid ID entered');   
@@ -153,7 +143,6 @@ router.post('/', function(req,res) {
                 const result = await newCustomerDoc.save();
                 console.log(result);
                 res.send(result); //Send the new object back in the HTTP response 
-
             } catch (error) {
                 console.log(error);
                 res.status(404).send('Resource not found');
