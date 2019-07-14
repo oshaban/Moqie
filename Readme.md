@@ -30,6 +30,7 @@ Notes on how to deploy to a live system will updated shortly
 
 * [Express.js](https://expressjs.com/) - Web framework used
 * [Joi](https://www.npmjs.com/package/@hapi/joi) - Validator for JavaScript
+* [Joi-ObjectId](https://www.npmjs.com/package/joi-objectid) - A MongoDB ObjectId validator for Joi
 * [Helmet](https://helmetjs.github.io/) - Secures Express apps by setting various HTTP headers
 * [Morgan](https://github.com/expressjs/morgan) - HTTP request logger middleware for node.js
 * [MongoDB](https://mongodb.github.io/node-mongodb-native/) - MongoDB for node.js

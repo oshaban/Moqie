@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router(); //Creates a router as a module
 const Joi = require('@hapi/joi'); //Used for input validation
+Joi.objectId = require('joi-objectid')(Joi);
 
 const {Rental} = require('../models/rental'); //Load Rental DB Model
 const {Movie} = require('../models/movie'); //Load Movie DB Model
@@ -119,8 +120,8 @@ router.post('/', function(req,res) {
 function validateRental(rental) {
     //Defines validation schema using JOI
     const schema = Joi.object().keys({
-        customerID: Joi.string().required(),
-        movieID: Joi.string().required(),
+        customerID: Joi.objectId().required(),
+        movieID: Joi.objectId().required(),
     })
 
     //If result.error === null -> input is valid
