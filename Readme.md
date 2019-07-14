@@ -35,6 +35,9 @@ Notes on how to deploy to a live system will updated shortly
 * [Morgan](https://github.com/expressjs/morgan) - HTTP request logger middleware for node.js
 * [MongoDB](https://mongodb.github.io/node-mongodb-native/) - MongoDB for node.js
 * [Mongoose](https://mongoosejs.com/docs/index.html) - MongoDB object modeling for node.js
+* [Bcrypt.js](https://www.npmjs.com/package/bcryptjs) - Password hashing for JavaScript
+* [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) - An implementation of JSON Web Tokens
+* [dotenv](https://www.npmjs.com/package/dotenv) - Loads environment variables
 
 ## Authors
 

@@ -3,6 +3,8 @@
 const express = require('express');
 const router = express.Router(); //Creates a router as a module
 const Joi = require('@hapi/joi'); //Used for input validation
+const auth = require('../middleware/auth'); //Middleware for auth
+const admin = require('../middleware/admin');
 
 const {Genre} = require('../models/genre')
 
@@ -91,7 +93,7 @@ router.put('/:id', function(req,res) {
 //A DELETE request to this endpoint will delete a genre with a specified id
     //Body request is empty
     //Body response is a JSON with the deleted genre
-router.delete('/:id', function(req,res) {
+router.delete('/:id', [auth, admin], function(req,res) {
     enteredID = req.params.id; //Gets dynamic route parameter
   
     async function deleteGenre() {
@@ -120,7 +122,7 @@ router.delete('/:id', function(req,res) {
     //Body request is a JSON pay-load with a 'name' property {name: 'your-name'}
         //name property must be a string of length 3; if not valid 400 - Bad request is sent
     //Body response is a JSON with the new genre
-router.post('/', function(req,res) {
+router.post('/', auth, function(req,res) {
 
     const result = validateGenre(req.body); //If result.error === null -> input is valid
 
