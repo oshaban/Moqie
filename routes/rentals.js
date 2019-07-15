@@ -12,107 +12,65 @@ const {Customer} = require('../models/customer'); //Load Customer DB Model
 //A GET request to this endpoint will return all rentals
     //Body request is empty
     //Body response is a JSON with all rentals
-router.get('/', function(req,res) {
+router.get('/', async function(req,res,next) {
     
-    async function getRentals() {
-        try {
-            const fetchedRentals = await Rental.find();
-            console.log(fetchedRentals);
-            res.send(fetchedRentals);
+    try {
+        const fetchedRentals = await Rental.find();
+        console.log(fetchedRentals);
+        res.send(fetchedRentals);
 
-        } catch (error) {
-            res.status(404).send('Resource Not Found');   
-        }
-    }
-
-    getRentals();
-    
+    } catch (error) {
+        next(error); //Passes the error to the error-middle-ware function 
+    }   
 });
-
-//A GET request to this endpoint will return a movie with the specified ID in the route param
-    //Body request is empty
-    //Body response is a JSON with the movie containing the specified ID. 404 is returned if resource not found.
-/* router.get('/:id', function(req,res) {
-    enteredID = req.params.id; //Gets dynamic route parameter
-
-    async function getMovie() {
-        try {
-            const fetchedMovie = await Movie.find({_id: enteredID});
-            //fetchedMovie = [] if no such movie exists
-            console.log(fetchedMovie);
-            
-            if(!fetchedMovie.length) {
-                //There are no such movies found
-                res.status(404).send('Movie with given ID is not found.');
-            }
-            else {
-                console.log(fetchedMovie);
-                res.send(fetchedMovie);
-            }
-        } catch (error) {
-            //If ID entered is an invalid MongoDB ID
-            res.status(400).send('Invalid ID entered');   
-        }
-    }
-
-    getMovie();
-
-}); */
 
 //A POST request to this endpoint will create a new rental
     //Body request is a JSON pay-load: {customerID:..., movieID:...}
     //Body response is a JSON with the new rental
-router.post('/', function(req,res) {
+router.post('/', async function(req,res,next) {
 
     const inputValid = validateRental(req.body); //If inputValid.error === null -> input is valid
 
-    if(inputValid.error === null) {
+    if(inputValid.error != null) {
+        return res.status(400).send(inputValid.error); //400 Bad Request
+    }
 
-        //Find the Genre to create the rental document:
-        async function createRental() {
-            try {
-                
-                const movieDoc = await Movie.findById(req.body.movieID);
-                if(!movieDoc) return res.status(400).send('Invalid Movie ID.');
+    //Find the Genre to create the rental document:
+    try {
+        const movieDoc = await Movie.findById(req.body.movieID);
+        if(!movieDoc) return res.status(400).send('Invalid Movie ID.');
 
-                const customerDoc = await Customer.findById(req.body.customerID);
-                if(!customerDoc) return res.status(400).send('Invalid Customer ID.');
+        const customerDoc = await Customer.findById(req.body.customerID);
+        if(!customerDoc) return res.status(400).send('Invalid Customer ID.');
 
-                if(movieDoc.numberInStock === 0) return res.status(400).send('Movie not in stock');
+        if(movieDoc.numberInStock === 0) return res.status(400).send('Movie not in stock');
 
-                console.log(movieDoc);
+        console.log(movieDoc);
 
-                //Create a new Rental using the Model
-                const newRentalDoc = new Rental({
-                    customer: {
-                        _id: customerDoc._id,
-                        name: customerDoc.name,
-                        phone: customerDoc.phone
-                    },
-                    movie: {
-                        _id: movieDoc._id,
-                        title: movieDoc.title,
-                        dailyRentalRate: movieDoc.dailyRentalRate
-                    },
-                });
-                
-                const rental = await newRentalDoc.save();
-                console.log(rental);
+        //Create a new Rental using the Model
+        const newRentalDoc = new Rental({
+            customer: {
+                _id: customerDoc._id,
+                name: customerDoc.name,
+                phone: customerDoc.phone
+            },
+            movie: {
+                _id: movieDoc._id,
+                title: movieDoc.title,
+                dailyRentalRate: movieDoc.dailyRentalRate
+            },
+        });
+        
+        const rental = await newRentalDoc.save();
+        console.log(rental);
 
-                movie.numberInStock--;
-                movie.save();
+        movie.numberInStock--;
+        movie.save();
 
-                res.send(rental);
-  
-            } catch (error) {
-                console.log("Error: " + error);
-                return res.status(404).send(error);
-            }
-        }
-        createRental();
+        res.send(rental);
 
-    } else {
-        res.status(400).send(inputValid.error); //400 Bad Request
+    } catch (error) {
+        next(error); //Passes the error to the error-middle-ware function
     }
 });
 

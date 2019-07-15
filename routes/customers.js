@@ -9,59 +9,47 @@ const {Customer} = require('../models/customer'); //Load Customer DB Model
 //A GET request to this endpoint will return all customers
     //Body request is empty
     //Body response is a JSON with all customers
-router.get('/', function(req,res) {
-    
-    async function getCustomers() {
-        try {
-            const fetchedCustomers = await Customer.find();
-            console.log(fetchedCustomers);
-            res.send(fetchedCustomers);
+router.get('/', async function(req,res,next) {
+    try {
+        const fetchedCustomers = await Customer.find();
+        console.log(fetchedCustomers);
+        res.send(fetchedCustomers);
 
-        } catch (error) {
-            res.status(404).send('Resource Not Found');   
-        }
+    } catch (error) {
+        next(error); //Passes the error to the error-middle-ware function  
     }
-
-    getCustomers();
-    
 });
 
 //A GET request to this endpoint will return a customer with the specified ID in the route param
     //Body request is empty
     //Body response is a JSON with the customer containing the specified ID. 404 is returned if resource not found.
-router.get('/:id', function(req,res) {
+router.get('/:id', async function(req,res,next) {
     enteredID = req.params.id; //Gets dynamic route parameter
 
-    async function getCustomer() {
-        try {
-            const fetchedCustomer = await Customer
-                .find({_id: enteredID})
-                .select({name: 1});
-            //fetchedCustomer = [] if no such customer exists
-            console.log(fetchedCustomer);
-            
-            if(!fetchedCustomer.length) {
-                //There are no such customers found
-                res.status(404).send('Resource Not Found');
-            }
-            else {
-                console.log(fetchedCustomer);
-                res.send(fetchedCustomer);
-            }
-        } catch (error) {
-            //If ID entered is an invalid MongoDB ID
-            res.status(400).send('Invalid ID entered');   
+    try {
+        const fetchedCustomer = await Customer
+            .find({_id: enteredID})
+            .select({name: 1});
+        //fetchedCustomer = [] if no such customer exists
+        console.log(fetchedCustomer);
+        
+        if(!fetchedCustomer.length) {
+            //There are no such customers found
+            res.status(404).send('Resource Not Found');
         }
+        else {
+            console.log(fetchedCustomer);
+            res.send(fetchedCustomer);
+        }
+    } catch (error) {
+        next(error);//Passes the error to the error-middle-ware function  
     }
-
-    getCustomer();
-
 });
 
 //A PUT request to this endpoint will update a customer with a specified id
     //Body request is a JSON pay-load: {isPremium:..., name:..., phone:...}
     //Body response is a JSON with the updated customer
-router.put('/:id', function(req,res) {
+router.put('/:id', async function(req,res,next) {
     enteredID = req.params.id; //Gets dynamic route parameter
 
     //Validate the HTTP body request
@@ -73,35 +61,31 @@ router.put('/:id', function(req,res) {
         updateCustomer();
     } 
 
-    async function updateCustomer() {
-        try {
-            const fetchedCustomer = await Customer
-            .findByIdAndUpdate(enteredID,
-                {isPremium: req.body.isPremium, name: req.body.name, phone: req.body.phone},
-                {new: true, useFindAndModify: false});
+    try {
+        const fetchedCustomer = await Customer
+        .findByIdAndUpdate(enteredID,
+            {isPremium: req.body.isPremium, name: req.body.name, phone: req.body.phone},
+            {new: true, useFindAndModify: false});
 
-            if(fetchedCustomer === null) {
-                //Customer with ID was not found in the DB
-                res.status(404).send('Resource not found');
-            } else {
-                console.log(fetchedCustomer);
-                res.send(fetchedCustomer);
-            }
-
-        } catch (error) {
-            console.log("Error " + error);
-            res.status(404).send('Error: ' + error)
+        if(fetchedCustomer === null) {
+            //Customer with ID was not found in the DB
+            res.status(404).send('Resource not found');
+        } else {
+            console.log(fetchedCustomer);
+            res.send(fetchedCustomer);
         }
+
+    } catch (error) {
+        next(error);//Passes the error to the error-middle-ware function
     }
 });
 
 //A DELETE request to this endpoint will delete a customer with a specified id
     //Body request is empty
     //Body response is a JSON with the deleted customer
-router.delete('/:id', function(req,res) {
+router.delete('/:id', async function(req,res,next) {
     enteredID = req.params.id; //Gets dynamic route parameter
   
-    async function deleteCustomer() {
         try {
             const deletedCustomer = await Customer.findByIdAndDelete(enteredID);
             
@@ -113,46 +97,35 @@ router.delete('/:id', function(req,res) {
                 res.send(deletedCustomer);
             }
         } catch (error) {
-            res.status(400).send('Invalid ID entered');   
+            next(error); //Passes the error to the error-middle-ware function
         }
-    }
-
-    deleteCustomer(); 
-
 });
 
 //A POST request to this endpoint will create a new customer
     //Body request is a JSON pay-load: {isPremium:..., name:..., phone:...}
     //Body response is a JSON with the new customer
-router.post('/', function(req,res) {
+router.post('/', async function(req,res,next) {
 
     const inputValid = validateCustomer(req.body); //If inputValid.error === null -> input is valid
 
-    if(inputValid.error === null) {
+    if(inputValid.error!=null) {
+        return res.status(400).send(inputValid.error); //400 Bad Request
+    }
 
-        //Create a new Customer using the Model
-        const newCustomerDoc = new Customer({
-            isPremium: req.body.isPremium,
-            name: req.body.name,
-            phone: req.body.phone
-        });
+    //Create a new Customer using the Model
+    const newCustomerDoc = new Customer({
+        isPremium: req.body.isPremium,
+        name: req.body.name,
+        phone: req.body.phone
+    });
 
-        async function createCustomer() {
-            //Save the document to the DB
-            try {
-                const result = await newCustomerDoc.save();
-                console.log(result);
-                res.send(result); //Send the new object back in the HTTP response 
-            } catch (error) {
-                console.log(error);
-                res.status(404).send('Resource not found');
-            }
-        }
-
-        createCustomer();
-
-    } else {
-        res.status(400).send(inputValid.error); //400 Bad Request
+    //Save the document to the DB
+    try {
+        const result = await newCustomerDoc.save();
+        console.log(result);
+        res.send(result); //Send the new object back in the HTTP response 
+    } catch (error) {
+        next(error); //Passes the error to the error-middle-ware function
     }
 });
 

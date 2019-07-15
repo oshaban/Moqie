@@ -11,11 +11,15 @@ const {User} = require('../models/user'); //Load User DB Model
 //A GET request to this endpoint will return user with the current JSON Web Token (JWT)
     //Request header 'x-auth-token' should contain a JSON Web Token (JWT)
     //Request body will contain the user with given token
-router.get('/me', auth, async function(req,res) {
+router.get('/me', auth, async function(req,res,next) {
     //Endpoint is only available to authenticated users
         //Uses auth middle-ware to ensure JWT is provided
-    const user = await User.findById(req.user._id).select('-password'); //Excludes password from user
-    res.send(user);
+    try {
+        const user = await User.findById(req.user._id).select('-password'); //Excludes password from user
+        res.send(user);
+    } catch (error) {
+        next(error); //Passes the error to the error-middle-ware function
+    }
 });
 
 //A POST request to this endpoint will create a new user
@@ -24,7 +28,9 @@ router.get('/me', auth, async function(req,res) {
 router.post('/', async function(req,res) {
 
     const inputValid = validateUser(req.body); //If inputValid.error === null -> input is valid
-    if(inputValid.error != null) return res.status(400).send(inputValid.error); //400 Bad Request
+    if(inputValid.error != null){
+        return res.status(400).send(inputValid.error); //400 Bad Request
+    }
 
     try {
         //Check if user is already registered
@@ -53,8 +59,7 @@ router.post('/', async function(req,res) {
             }); 
 
     } catch (error) {
-        console.log(error);
-        res.status(404).send('Resource not found');
+        next(error); //Passes the error to the error-middle-ware function
     }
 });
 
