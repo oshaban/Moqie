@@ -38,6 +38,7 @@ Notes on how to deploy to a live system will updated shortly
 * [Bcrypt.js](https://www.npmjs.com/package/bcryptjs) - Password hashing for JavaScript
 * [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) - An implementation of JSON Web Tokens
 * [dotenv](https://www.npmjs.com/package/dotenv) - Loads environment variables
+* [winston](https://www.npmjs.com/package/winston) - Logging Errors
 
 ## Authors
 
