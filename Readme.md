@@ -1,4 +1,4 @@
-# Project Title
+# Moqie
 
 Moqie is a back-end service for renting out movies.
 
@@ -20,7 +20,11 @@ In the project folder, run: $ npm i
 
 ## Running the tests
 
-Explanation on how to run automated tests will be updated shortly
+Tests are written using the JEST package
+
+```
+To run the tests: $ npm test
+```
 
 ## Deployment
 
@@ -39,6 +43,8 @@ Notes on how to deploy to a live system will updated shortly
 * [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) - An implementation of JSON Web Tokens
 * [dotenv](https://www.npmjs.com/package/dotenv) - Loads environment variables
 * [winston](https://www.npmjs.com/package/winston) - Logging Errors
+* [jest](https://www.npmjs.com/package/jest) - JavaScript Testing
+* [supertest](https://www.npmjs.com/package/supertest) - Integration testing using HTTP assertions
 
 ## Authors
 

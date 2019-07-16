@@ -10,4 +10,5 @@ require('./startup/logging')(); //Loads logging and error handling
 require('./startup/db')(); //Connects to database
 require('./startup/routes')(app); //Loads all routes
 
-app.listen(port, ()=> winston.info('Listening on port ' + port));
+const server = app.listen(port, ()=> winston.info(`Listening on port ${port}`) );
+module.exports = server;

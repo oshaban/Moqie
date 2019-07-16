@@ -2,3 +2,4 @@ node_modules/
 hash.js
 logfile.log
 *.env
+coverage/

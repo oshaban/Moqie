@@ -5,6 +5,7 @@ const router = express.Router(); //Creates a router as a module
 const Joi = require('@hapi/joi'); //Used for input validation
 const auth = require('../middleware/auth'); //Middleware for auth
 const admin = require('../middleware/admin');
+const mongoose = require('mongoose');
 
 const {Genre} = require('../models/genre') //Loads Genre Mongoose Model
 
@@ -25,6 +26,8 @@ router.get('/', async function(req,res,next) {
     //Body response is a JSON with the genre containing the specified ID. 404 is returned if resource not found.
 router.get('/:id', async function(req,res,next) {
     enteredID = req.params.id; //Gets dynamic route parameter
+
+    if (!mongoose.Types.ObjectId.isValid(enteredID) ) return res.status(404).send('Invalid ID');
 
     try {
         const fetchedGenre = await Genre
@@ -77,7 +80,7 @@ router.put('/:id', async function(req,res,next) {
 //A DELETE request to this endpoint will delete a genre with a specified id
     //Body request is empty
     //Body response is a JSON with the deleted genre
-router.delete('/:id', [auth, admin], async function(req,res,next) {
+router.delete('/:id', [auth], async function(req,res,next) {
     enteredID = req.params.id; //Gets dynamic route parameter
 
     try {
