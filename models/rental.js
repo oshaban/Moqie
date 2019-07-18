@@ -22,6 +22,14 @@ const rentalSchema = new Schema({
     rentalFee: {type: Number, min: 0, max: 100000}
 });
 
+//Calculates rental fee upon returned
+rentalSchema.methods.returnRental = function() {
+    let dailyRentalRate = this.movie.dailyRentalRate;
+    let daysOut = this.dateReturned - this.dateOut;
+    
+    this.set({rentalFee: dailyRentalRate * daysOut});
+}
+
 //Defines a new collection 'Rentals' in the DB; known as a Model
 const Rental = mongoose.model('Rentals', rentalSchema);
 

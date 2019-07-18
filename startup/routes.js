@@ -8,6 +8,7 @@ const movies = require('../routes/movies'); //Loads the router module for movies
 const rentals = require('../routes/rentals'); //Loads the router module for rentals endpoint
 const users = require('../routes/users'); //Loads the router module for rentals endpoint
 const auth = require('../routes/auth'); //Loads the auth module for rentals endpoint
+const returns = require('../routes/returns'); //Loads the returns module for rentals endpoint
 
 //Error handling middleware:
 const errorHandle = require('../middleware/error'); //Loads Error Middleware function
@@ -20,6 +21,7 @@ function loadRoutes(app) {
     app.use('/api/rentals', rentals) //Uses the rentals router if path is '/rentals'
     app.use('/api/users', users) //Uses the users router if path is '/users'
     app.use('/api/auth', auth) //Uses the auth router if path is '/auth'
+    app.use('/api/returns', returns) //Uses the returns router if path is '/returns'
 
     //Users Express error handling middle-ware:
     app.use(errorHandle);

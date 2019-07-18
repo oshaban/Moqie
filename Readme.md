@@ -45,6 +45,7 @@ Notes on how to deploy to a live system will updated shortly
 * [winston](https://www.npmjs.com/package/winston) - Logging Errors
 * [jest](https://www.npmjs.com/package/jest) - JavaScript Testing
 * [supertest](https://www.npmjs.com/package/supertest) - Integration testing using HTTP assertions
+* [compression](https://www.npmjs.com/package/compression) - Node.js compression middleware
 
 ## Authors
 

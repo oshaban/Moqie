@@ -13,7 +13,7 @@ describe('/api/genres', ()=> {
     beforeEach(()=>{ server = require('../../index'); });
     afterEach(async ()=>{ 
         await Genre.remove({}); //Removes all documents
-        server.close(); 
+        await server.close(); 
     });
     
     describe('GET', ()=>{

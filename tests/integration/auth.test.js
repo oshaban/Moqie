@@ -13,7 +13,7 @@ describe('auth middleware', ()=>{
         server = require('../../index'); 
         token = new User().generateAuthToken();
     });
-    afterEach(async ()=>{ server.close(); });
+    afterEach(async ()=>{ await server.close(); });
 
     const exec = function() {
         return request(server)
