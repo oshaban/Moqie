@@ -12,7 +12,9 @@ function dbConnect() {
     //If environment is set to test, load test database
     if(process.env.NODE_ENV==="test") {
         DB=process.env.DB_TEST
-    } 
+    } else if(process.env.NODE_ENV==="production") {
+        DB=process.env.DB_PROD
+    }
 
     //Connects to local MongoDB database
     mongoose.connect(DB, {useNewUrlParser: true})
